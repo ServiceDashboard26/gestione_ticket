@@ -2,18 +2,24 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Gestione Ticket</title>
+    <title>Gestione Ticket - Benvenuto</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-        .header { border-bottom: 2px solid #28a745; margin-bottom: 20px; }
-        .data-label { font-weight: bold; color: #666; width: 120px; display: inline-block; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 650px; margin: auto; }
+        .header { border-bottom: 2px solid #28a745; margin-bottom: 20px; padding-bottom: 10px; }
+        .data-label { font-weight: bold; color: #666; width: 140px; display: inline-block; }
         .data-value { color: #28a745; font-weight: bold; font-size: 1.1em; }
-        textarea { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; resize: none; box-sizing: border-box; }
-        button { width: 100%; background: #28a745; color: white; border: none; padding: 15px; margin-top: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 30px; background: white; font-size: 13px; }
-        th { background: #28a745; color: white; padding: 10px; }
+        .timestamp-info { font-size: 0.9em; color: #888; margin-top: 10px; font-style: italic; }
+        textarea { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; resize: none; box-sizing: border-box; }
+        button { width: 100%; background: #28a745; color: white; border: none; padding: 15px; margin-top: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        button:hover { background: #218838; }
+        
+        /* Tabella Storico */
+        table { width: 100%; border-collapse: collapse; margin-top: 40px; background: white; font-size: 13px; }
+        th { background: #28a745; color: white; padding: 12px; text-align: left; border: 1px solid #218838; }
         td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .time-cell { font-family: monospace; color: #444; }
     </style>
 </head>
 <body>
@@ -21,62 +27,91 @@
 <div class="container">
     <div class="header">
         <h2>Benvenuto, <span id="c_header">Cliente</span></h2>
+        <div id="access-time" class="timestamp-info">Accesso effettuato il: --/--/---- ore --:--</div>
     </div>
     
     <div style="line-height: 1.8;">
-        <div><span class="data-label">Strumento:</span> <span id="t_val" class="data-value">...</span></div>
-        <div><span class="data-label">Seriale:</span> <span id="s_val" class="data-value">...</span></div>
-        <div><span class="data-label">Cliente:</span> <span id="c_val" class="data-value">...</span></div>
+        <div><span class="data-label">Strumento (t):</span> <span id="t_val" class="data-value">...</span></div>
+        <div><span class="data-label">Seriale (s):</span> <span id="s_val" class="data-value">...</span></div>
+        <div><span class="data-label">Cliente (c):</span> <span id="c_val" class="data-value">...</span></div>
     </div>
 
-    <hr>
-    <label><strong>Descrizione Problema (descr):</strong></label>
-    <textarea id="descr" maxlength="256" rows="4" placeholder="Scrivi qui..."></textarea>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
     
-    <button onclick="salvaTicket()">INVIA E AGGIORNA LISTA</button>
+    <label><strong>Descrizione Problema (descr):</strong></label>
+    <textarea id="descr" maxlength="256" rows="4" placeholder="Descrivi qui il malfunzionamento..."></textarea>
+    
+    <button onclick="salvaTicket()">INVIA SEGNALAZIONE</button>
 </div>
 
-<table id="logTable">
-    <thead>
-        <tr>
-            <th>Cliente</th>
-            <th>Strumento</th>
-            <th>Seriale</th>
-            <th>Descrizione</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div style="max-width: 900px; margin: 20px auto;">
+    <h3 style="color: #28a745; text-align: center;">Storico Segnalazioni</h3>
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>Data e Ora</th>
+                <th>Cliente</th>
+                <th>Strumento</th>
+                <th>Seriale</th>
+                <th>Descrizione</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</div>
 
 <script>
+    // Funzione per formattare Data e Ora
+    function getNow() {
+        const adesso = new Date();
+        return adesso.toLocaleDateString('it-IT') + ' ' + adesso.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // Funzione per leggere i parametri URL
     function getCleanParam(name) {
-        // Cerca nell'URL della pagina corrente
         const results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
         if (results == null) return "N/A";
         return decodeURIComponent(results[1]) || "N/A";
     }
 
-    // Carichiamo i dati nelle variabili
+    // Caricamento variabili globali
     const cliente = getCleanParam('c');
     const strumento = getCleanParam('t');
     const seriale = getCleanParam('s');
 
-    // Scriviamo i dati nella pagina
     window.onload = function() {
+        // Scriviamo i dati nella pagina
         document.getElementById('c_header').innerText = cliente;
         document.getElementById('c_val').innerText = cliente;
         document.getElementById('t_val').innerText = strumento;
         document.getElementById('s_val').innerText = seriale;
+        
+        // Scriviamo l'ora di accesso
+        document.getElementById('access-time').innerText = "Accesso effettuato il: " + getNow();
     };
 
     function salvaTicket() {
-        const d = document.getElementById('descr').value;
-        if(!d) return alert("Inserisci una descrizione");
+        const descr = document.getElementById('descr').value.trim();
+        if(!descr) {
+            alert("Per favore, inserisci una descrizione del problema.");
+            return;
+        }
 
         const tbody = document.querySelector("#logTable tbody");
-        const row = tbody.insertRow(0);
-        row.innerHTML = `<td>${cliente}</td><td>${strumento}</td><td>${seriale}</td><td style="background:#e8f5e9">${d}</td>`;
+        const row = tbody.insertRow(0); // Inserisce in alto
         
+        const oraSegnalazione = getNow();
+
+        row.innerHTML = `
+            <td class="time-cell">${oraSegnalazione}</td>
+            <td>${cliente}</td>
+            <td>${strumento}</td>
+            <td>${seriale}</td>
+            <td style="background:#f1fff1; font-weight:500;">${descr}</td>
+        `;
+
+        // Reset campo testo
         document.getElementById('descr').value = "";
     }
 </script>
