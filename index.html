@@ -91,7 +91,7 @@
         document.getElementById('access-time').innerText = "Accesso effettuato il: " + getNow();
     };
 
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxEHjj28dF8AJ3qNFDMChGqgNMCv3wl5PgcM1LC2gltKMNj6uuSzDVfJi1dpIW3tmQAzg/exec';
+   const scriptURL = 'https://script.google.com/macros/s/AKfycbyqOus8XSY_9gZamUgfbrdtsEU3V1a9xuAY-vSYkgqYS_hZISd_p7fy4lyOx48N17XMTg/exec';
 
 function salvaTicket() {
     const descr = document.getElementById('descr').value.trim();
@@ -99,27 +99,31 @@ function salvaTicket() {
 
     const oraSegnalazione = getNow();
     
-    // Preparazione dati per Google Sheets
-    const datiPerSheets = {
-        dataOra: oraSegnalazione,
-        cliente: cliente,
-        strumento: strumento,
-        seriale: seriale,
-        descrizione: descr
-    };
+    // Usiamo FormData per evitare problemi di permessi (CORS)
+    const formData = new FormData();
+    formData.append('dataOra', oraSegnalazione);
+    formData.append('cliente', cliente);
+    formData.append('strumento', strumento);
+    formData.append('seriale', seriale);
+    formData.append('descrizione', descr);
 
-    // Invia i dati a Google Sheets
-    fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors', // Necessario per Apps Script
-        body: JSON.stringify(datiPerSheets),
-        headers: { 'Content-Type': 'application/json' }
-    }).then(() => {
-        // Se l'invio ha successo, aggiorna la tabella visiva locale
+    // Mostriamo un messaggio di caricamento
+    console.log("Invio in corso...");
+
+    fetch(scriptURL, { 
+        method: 'POST', 
+        body: formData,
+        mode: 'no-cors' // Fondamentale per Google Apps Script
+    })
+    .then(() => {
+        alert("Segnalazione registrata!");
         aggiornaTabellaLocale(oraSegnalazione, descr);
         document.getElementById('descr').value = "";
-        alert("Segnalazione inviata con successo al database!");
-    }).catch(error => alert("Errore nell'invio: " + error));
+    })
+    .catch(error => {
+        console.error('Errore!', error.message);
+        alert("Errore di connessione. Riprova.");
+    });
 }
 
 function aggiornaTabellaLocale(ora, d) {
@@ -131,4 +135,5 @@ function aggiornaTabellaLocale(ora, d) {
 
 </body>
 </html>
+
 
