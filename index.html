@@ -91,30 +91,44 @@
         document.getElementById('access-time').innerText = "Accesso effettuato il: " + getNow();
     };
 
-    function salvaTicket() {
-        const descr = document.getElementById('descr').value.trim();
-        if(!descr) {
-            alert("Per favore, inserisci una descrizione del problema.");
-            return;
-        }
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxEHjj28dF8AJ3qNFDMChGqgNMCv3wl5PgcM1LC2gltKMNj6uuSzDVfJi1dpIW3tmQAzg/exec';
 
-        const tbody = document.querySelector("#logTable tbody");
-        const row = tbody.insertRow(0); // Inserisce in alto
-        
-        const oraSegnalazione = getNow();
+function salvaTicket() {
+    const descr = document.getElementById('descr').value.trim();
+    if(!descr) return alert("Inserisci una descrizione");
 
-        row.innerHTML = `
-            <td class="time-cell">${oraSegnalazione}</td>
-            <td>${cliente}</td>
-            <td>${strumento}</td>
-            <td>${seriale}</td>
-            <td style="background:#f1fff1; font-weight:500;">${descr}</td>
-        `;
+    const oraSegnalazione = getNow();
+    
+    // Preparazione dati per Google Sheets
+    const datiPerSheets = {
+        dataOra: oraSegnalazione,
+        cliente: cliente,
+        strumento: strumento,
+        seriale: seriale,
+        descrizione: descr
+    };
 
-        // Reset campo testo
+    // Invia i dati a Google Sheets
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // Necessario per Apps Script
+        body: JSON.stringify(datiPerSheets),
+        headers: { 'Content-Type': 'application/json' }
+    }).then(() => {
+        // Se l'invio ha successo, aggiorna la tabella visiva locale
+        aggiornaTabellaLocale(oraSegnalazione, descr);
         document.getElementById('descr').value = "";
-    }
+        alert("Segnalazione inviata con successo al database!");
+    }).catch(error => alert("Errore nell'invio: " + error));
+}
+
+function aggiornaTabellaLocale(ora, d) {
+    const tbody = document.querySelector("#logTable tbody");
+    const row = tbody.insertRow(0);
+    row.innerHTML = `<td>${ora}</td><td>${cliente}</td><td>${strumento}</td><td>${seriale}</td><td>${d}</td>`;
+}
 </script>
 
 </body>
 </html>
+
