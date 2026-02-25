@@ -2,139 +2,122 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Gestione Ticket - Benvenuto</title>
+    <title>Segnalazione Guasto</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 650px; margin: auto; }
-        .header { border-bottom: 2px solid #28a745; margin-bottom: 20px; padding-bottom: 10px; }
-        .data-label { font-weight: bold; color: #666; width: 140px; display: inline-block; }
-        .data-value { color: #28a745; font-weight: bold; font-size: 1.1em; }
-        .timestamp-info { font-size: 0.9em; color: #888; margin-top: 10px; font-style: italic; }
-        textarea { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; resize: none; box-sizing: border-box; }
-        button { width: 100%; background: #28a745; color: white; border: none; padding: 15px; margin-top: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        button:hover { background: #218838; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 550px; margin: auto; }
         
-        /* Tabella Storico */
-        table { width: 100%; border-collapse: collapse; margin-top: 40px; background: white; font-size: 13px; }
-        th { background: #28a745; color: white; padding: 12px; text-align: left; border: 1px solid #218838; }
-        td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .time-cell { font-family: monospace; color: #444; }
+        .header { border-bottom: 2px solid #28a745; margin-bottom: 20px; padding-bottom: 10px; text-align: center; }
+        h2 { color: #28a745; margin: 0; min-height: 1.2em; }
+        
+        .info-box { background: #e9f7ef; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 15px; border-left: 5px solid #28a745; }
+        .info-box div { margin-bottom: 5px; }
+
+        label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input:focus, textarea:focus { border-color: #28a745; outline: none; background-color: #fff; }
+
+        button { width: 100%; background: #28a745; color: white; border: none; padding: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.3s; }
+        button:hover { background: #218838; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        .footer-note { font-size: 12px; color: #888; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>Benvenuto, <span id="c_header">Cliente</span></h2>
-        <div id="access-time" class="timestamp-info">Accesso effettuato il: --/--/---- ore --:--</div>
+        <h2 id="main-welcome">Benvenuto</h2>
+        <div id="customer-name" style="font-weight: bold; color: #666; margin-top: 5px;">Azienda: <span id="c_display">...</span></div>
     </div>
     
-    <div style="line-height: 1.8;">
-        <div><span class="data-label">Strumento (t):</span> <span id="t_val" class="data-value">...</span></div>
-        <div><span class="data-label">Seriale (s):</span> <span id="s_val" class="data-value">...</span></div>
-        <div><span class="data-label">Cliente (c):</span> <span id="c_val" class="data-value">...</span></div>
+    <div class="info-box">
+        <div><strong>Strumento:</strong> <span id="t_val">...</span></div>
+        <div><strong>Numero di Serie:</strong> <span id="s_val">...</span></div>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-    
-    <label><strong>Descrizione Problema (descr):</strong></label>
-    <textarea id="descr" maxlength="256" rows="4" placeholder="Descrivi qui il malfunzionamento..."></textarea>
-    
-    <button onclick="salvaTicket()">INVIA SEGNALAZIONE</button>
-</div>
+    <label for="nome_utente">Il tuo Nome (Referente):</label>
+    <input type="text" id="nome_utente" placeholder="Scrivi il tuo nome..." autocomplete="name">
 
-<div style="max-width: 900px; margin: 20px auto;">
-    <h3 style="color: #28a745; text-align: center;">Segnalazione registrata</h3>
-    <table id="logTable">
-        <thead>
-            <tr>
-                <th>Data e Ora</th>
-                <th>Cliente</th>
-                <th>Strumento</th>
-                <th>Seriale</th>
-                <th>Descrizione</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
+    <label for="tel_utente">Tuo Telefono:</label>
+    <input type="tel" id="tel_utente" placeholder="Esempio: +39 340 1234567">
+
+    <label for="descr">Descrizione del problema:</label>
+    <textarea id="descr" maxlength="256" rows="4" placeholder="Descrivi brevemente il malfunzionamento..."></textarea>
+    
+    <button onclick="inviaDati()">INVIA SEGNALAZIONE</button>
+    
+    <div class="footer-note">I dati verranno registrati nel database dell'assistenza tecnica.</div>
 </div>
 
 <script>
-    // Funzione per formattare Data e Ora
-    function getNow() {
-        const adesso = new Date();
-        return adesso.toLocaleDateString('it-IT') + ' ' + adesso.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    // URL del tuo script Google (Assicurati che sia l'ultimo distribuito)
+    const scriptURL = 'IL_TUO_URL_DI_GOOGLE_APPS_SCRIPT';
+
+    // Funzione per leggere i parametri dall'URL (c, t, s)
+    function getParam(n) {
+        const r = new RegExp('[\?&]' + n + '=([^&#]*)').exec(window.location.href);
+        return r ? decodeURIComponent(r[1]) : "N/D";
     }
 
-    // Funzione per leggere i parametri URL
-    function getCleanParam(name) {
-        const results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results == null) return "N/A";
-        return decodeURIComponent(results[1]) || "N/A";
-    }
+    const cliente = getParam('c');
+    const strumento = getParam('t');
+    const seriale = getParam('s');
 
-    // Caricamento variabili globali
-    const cliente = getCleanParam('c');
-    const strumento = getCleanParam('t');
-    const seriale = getCleanParam('s');
-
-    window.onload = function() {
-        // Scriviamo i dati nella pagina
-        document.getElementById('c_header').innerText = cliente;
-        document.getElementById('c_val').innerText = cliente;
+    window.onload = () => {
+        document.getElementById('c_display').innerText = cliente;
         document.getElementById('t_val').innerText = strumento;
         document.getElementById('s_val').innerText = seriale;
-        
-        // Scriviamo l'ora di accesso
-        document.getElementById('access-time').innerText = "Accesso effettuato il: " + getNow();
+
+        // Effetto dinamico: cambia il titolo mentre l'utente scrive il suo nome
+        const inputNome = document.getElementById('nome_utente');
+        const titoloBenvenuto = document.getElementById('main-welcome');
+
+        inputNome.addEventListener('input', () => {
+            const valore = inputNome.value.trim();
+            titoloBenvenuto.innerText = valore ? "Benvenuto, " + valore : "Benvenuto";
+        });
     };
 
-   const scriptURL = 'https://script.google.com/macros/s/AKfycbxEHjj28dF8AJ3qNFDMChGqgNMCv3wl5PgcM1LC2gltKMNj6uuSzDVfJi1dpIW3tmQAzg/exec';
+    function inviaDati() {
+        const nome = document.getElementById('nome_utente').value.trim();
+        const tel = document.getElementById('tel_utente').value.trim();
+        const d = document.getElementById('descr').value.trim();
 
-function salvaTicket() {
-    const descr = document.getElementById('descr').value.trim();
-    if(!descr) return alert("Inserisci una descrizione");
+        if (!nome || !d) {
+            alert("Per favore, inserisci almeno il tuo Nome e una descrizione del problema.");
+            return;
+        }
 
-    const oraSegnalazione = getNow();
-    
-    // Usiamo FormData per evitare problemi di permessi (CORS)
-    const formData = new FormData();
-    formData.append('dataOra', oraSegnalazione);
-    formData.append('cliente', cliente);
-    formData.append('strumento', strumento);
-    formData.append('seriale', seriale);
-    formData.append('descrizione', descr);
+        // Creazione parametri per l'invio
+        const params = new URLSearchParams();
+        params.append('dataOra', new Date().toLocaleString('it-IT'));
+        params.append('cliente', cliente);
+        params.append('strumento', strumento);
+        params.append('seriale', seriale);
+        params.append('descrizione', d);
+        params.append('nomeUtente', nome);
+        params.append('telefonoUtente', tel);
 
-    // Mostriamo un messaggio di caricamento
-    console.log("Invio in corso...");
-
-    fetch(scriptURL, { 
-        method: 'POST', 
-        body: formData,
-        mode: 'no-cors' // Fondamentale per Google Apps Script
-    })
-    .then(() => {
-        alert("Segnalazione registrata!");
-        aggiornaTabellaLocale(oraSegnalazione, descr);
-        document.getElementById('descr').value = "";
-    })
-    .catch(error => {
-        console.error('Errore!', error.message);
-        alert("Errore di connessione. Riprova.");
-    });
-}
-
-function aggiornaTabellaLocale(ora, d) {
-    const tbody = document.querySelector("#logTable tbody");
-    const row = tbody.insertRow(0);
-    row.innerHTML = `<td>${ora}</td><td>${cliente}</td><td>${strumento}</td><td>${seriale}</td><td>${d}</td>`;
-}
+        fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: params })
+        .then(() => {
+            alert("Grazie " + nome + ", la tua segnalazione è stata inviata correttamente.");
+            // Reset dei campi
+            document.getElementById('descr').value = "";
+            document.getElementById('nome_utente').value = "";
+            document.getElementById('tel_utente').value = "";
+            document.getElementById('main-welcome').innerText = "Benvenuto";
+        })
+        .catch(e => {
+            console.error(e);
+            alert("Si è verificato un errore durante l'invio. Riprova.");
+        });
+    }
 </script>
 
 </body>
 </html>
+
 
 
 
